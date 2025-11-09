@@ -4,7 +4,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Set your desired Author/Developer Name here
-const AUTHOR_NAME = "Gemini Proxy Developer"; // <== CHANGE THIS TO YOUR NAME
+const AUTHOR_NAME = "@TheVextro"; // <== CHANGE THIS TO YOUR NAME
 
 // The base URL for the original external API
 const EXTERNAL_API_BASE = 'https://tele-social.vercel.app';
