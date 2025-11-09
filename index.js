@@ -83,46 +83,54 @@ app.get('/api/services', async (req, res) => {
     }
 });
 
-// --- Existing Endpoint 2: Proxy for Video Download (/api/download) ---
-// Note: This endpoint still streams the video and does not return JSON on success.
+// --- Endpoint 2: Proxy for Video Download (/api/download) ---
+// Note: This endpoint now RETURNS JSON METADATA, including the download link,
+// and DOES NOT automatically stream/download the video file.
 app.get('/api/download', async (req, res) => {
     const videoUrl = req.query.url; 
 
     if (!videoUrl) {
-        return res.status(400).json({ status: false, message: 'Missing video URL parameter.', author: AUTHOR_NAME });
+        return res.status(400).json({ 
+            status: false, 
+            message: 'Missing video URL parameter.', 
+            author: AUTHOR_NAME 
+        });
     }
 
     try {
         const externalUrl = `${EXTERNAL_API_BASE}/down?url=${encodeURIComponent(videoUrl)}`;
         
+        // 1. Fetch the metadata (JSON) from the external API
         const metadataResponse = await axios.get(externalUrl);
         const data = metadataResponse.data;
 
-        if (!data.status || data.data.type !== 'video') {
+        if (!data.status) {
+             // Handle case where external API returns JSON error
              return res.status(404).json({ 
                  status: false, 
                  author: AUTHOR_NAME, 
-                 message: 'Video data not found or unsupported format.' 
+                 message: 'Video data not found or unsupported format by the external service.' 
              });
         }
         
-        const mediaUrl = data.data.media.download; 
-        const videoResponse = await axios.get(mediaUrl, {
-            responseType: 'stream', 
-        });
+        // 2. Prepare the final JSON response by adding the author field
+        const finalResponse = {
+            author: AUTHOR_NAME,
+            ...data
+        };
 
-        const filename = data.data.media.filename || 'download.mp4';
-        res.setHeader('Content-Type', videoResponse.headers['content-type'] || 'video/mp4');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        
-        videoResponse.data.pipe(res);
+        // 3. Send the JSON response back to the client
+        res.json(finalResponse); // <--- Key Change: Returning JSON instead of streaming
 
     } catch (error) {
-        console.error('Error downloading video:', error.message);
+        // Log the error internally
+        console.error('Error fetching video metadata:', error.message);
+        
+        // Return a clean error response to the client
         res.status(500).json({ 
             status: false, 
             author: AUTHOR_NAME, 
-            message: 'Failed to process video download.' 
+            message: 'Failed to process request for video metadata.' 
         });
     }
 });
