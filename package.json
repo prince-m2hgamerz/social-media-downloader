@@ -1,0 +1,23 @@
+{
+  "name": "social-media-downloader-api",
+  "version": "1.0.0",
+  "description": "A proxy API for tele-social video download service.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "express",
+    "proxy",
+    "api",
+    "video",
+    "download"
+  ],
+  "author": "@TheVextro",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.8",
+    "express": "^4.19.2"
+  }
+}
